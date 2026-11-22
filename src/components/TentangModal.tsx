@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ModalShell } from './ui';
 import { IDENTITAS_PROYEK } from '../data/identitasProyek';
+import { TEAM_PHOTOS } from '../data/teamPhotos';
 import {
   Sparkles,
   BookOpen,
@@ -25,13 +26,26 @@ interface TentangModalProps {
 export const TentangModal: React.FC<TentangModalProps> = ({ isOpen, onClose }) => {
   const [teamPhotos, setTeamPhotos] = useState<Record<string, string>>({});
 
-  // Load photos from localStorage on mount
+  // Load photos from localStorage, with defaults from TEAM_PHOTOS
   useEffect(() => {
     if (isOpen) {
       try {
         const stored = localStorage.getItem(PHOTO_STORAGE_KEY);
         if (stored) {
           setTeamPhotos(JSON.parse(stored));
+        } else {
+          // Load default photos from TEAM_PHOTOS data
+          const defaults: Record<string, string> = {};
+          IDENTITAS_PROYEK.timPengembang.forEach((member) => {
+            if (TEAM_PHOTOS[member.nim]) {
+              defaults[member.nim] = TEAM_PHOTOS[member.nim];
+            }
+          });
+          setTeamPhotos(defaults);
+          // Auto-save defaults
+          if (Object.keys(defaults).length > 0) {
+            localStorage.setItem(PHOTO_STORAGE_KEY, JSON.stringify(defaults));
+          }
         }
       } catch (err) {
         console.warn('Failed to load team photos', err);
