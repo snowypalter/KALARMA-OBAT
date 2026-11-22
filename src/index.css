@@ -1,0 +1,263 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #F7F6F2;
+  --surface: #FFFFFF;
+  --surface-muted: #EFEFEA;
+  --surface-warm: #FAF8F5;
+  --elevated: #FFFFFF;
+  --line: #E1E4DC;
+  --line-strong: #5E7E74;
+  --ink: #1F2E29;
+  --ink-muted: #53645E;
+  --primary: #5E7E74;
+  --brand: #44665B;
+  --on-brand: #FFFFFF;
+  --secondary: #DCEAE5;
+  --forest: #203630;
+  --sand: #D8B99A;
+  --sand-soft: #F4EBE2;
+  --focus: #44665B;
+
+  --status-aman-text: #21593E;
+  --status-aman-bg: #E1EFE7;
+  --status-segera-text: #7A490B;
+  --status-segera-bg: #F7E9CE;
+  --status-kedaluwarsa-text: #8E2828;
+  --status-kedaluwarsa-bg: #F7DFDC;
+  color-scheme: light;
+}
+
+.dark, [data-theme="dark"] {
+  --bg: #121C18;
+  --surface: #182721;
+  --surface-muted: #1F312B;
+  --surface-warm: #15221D;
+  --elevated: #22362F;
+  --line: #293E35;
+  --line-strong: #4F796C;
+  --ink: #EEF4F0;
+  --ink-muted: #9EB3A9;
+  --primary: #6E9C8D;
+  --brand: #528373;
+  --on-brand: #FFFFFF;
+  --secondary: #223830;
+  --forest: #1A3329;
+  --sand: #E2C8AD;
+  --sand-soft: #2B251D;
+  --focus: #6E9C8D;
+
+  --status-aman-text: #6EE7B7;
+  --status-aman-bg: #133827;
+  --status-segera-text: #FCD34D;
+  --status-segera-bg: #382A15;
+  --status-kedaluwarsa-text: #FCA5A5;
+  --status-kedaluwarsa-bg: #3A1B1B;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-warm: var(--surface-warm);
+  --color-elevated: var(--elevated);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-primary: var(--primary);
+  --color-brand: var(--brand);
+  --color-on-brand: var(--on-brand);
+  --color-secondary: var(--secondary);
+  --color-forest: var(--forest);
+  --color-sand: var(--sand);
+  --color-sand-soft: var(--sand-soft);
+  --color-focus: var(--focus);
+
+  --color-status-aman-text: var(--status-aman-text);
+  --color-status-aman-bg: var(--status-aman-bg);
+  --color-status-segera-text: var(--status-segera-text);
+  --color-status-segera-bg: var(--status-segera-bg);
+  --color-status-kedaluwarsa-text: var(--status-kedaluwarsa-text);
+  --color-status-kedaluwarsa-bg: var(--status-kedaluwarsa-bg);
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-heading: 'Fraunces', Georgia, serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'DM Mono', monospace;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-body);
+    font-size: clamp(16px, 1.05vw, 17px);
+    line-height: 1.65;
+    color: var(--ink);
+    background-color: var(--bg);
+    -webkit-tap-highlight-color: transparent;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    color: var(--ink);
+    text-wrap: balance;
+  }
+
+  *:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+}
+
+/* =========================================================================
+   Penyesuaian Tipografi & Kenyamanan Membaca Mode Gelap (Dark Mode Readability)
+   ========================================================================= */
+
+/* Seluruh teks dengan class text-forest di mode gelap otomatis menjadi warm ivory-mint terang berkontras tinggi */
+.dark .text-forest,
+[data-theme="dark"] .text-forest {
+  color: #EEF4F0;
+}
+
+/* Pada tombol atau lencana berlatar terang (seperti bg-sand), teks forest tetap gelap pekat agar terbaca tajam */
+.dark .bg-sand.text-forest,
+.dark .bg-sand .text-forest,
+.dark [class*="bg-sand"].text-forest,
+[data-theme="dark"] .bg-sand.text-forest,
+[data-theme="dark"] .bg-sand .text-forest,
+[data-theme="dark"] [class*="bg-sand"].text-forest {
+  color: #12211C !important;
+}
+
+/* Teks sekunder pada panel gelap tetap lembut dan kontras nyaman */
+.dark .text-secondary,
+[data-theme="dark"] .text-secondary {
+  color: #C7DFD7 !important;
+}
+
+/* Hover & Group Hover States untuk text-forest */
+.dark a:hover.hover\:text-forest,
+.dark button:hover.hover\:text-forest,
+.dark .group:hover .group-hover\:text-forest,
+[data-theme="dark"] a:hover.hover\:text-forest,
+[data-theme="dark"] button:hover.hover\:text-forest,
+[data-theme="dark"] .group:hover .group-hover\:text-forest {
+  color: #EEF4F0;
+}
+
+/* Pastikan kartu elevated dan border di mode gelap memiliki pemisah visual yang halus dan tidak melelahkan mata */
+.dark .shadow-xs,
+[data-theme="dark"] .shadow-xs,
+.dark .shadow-sm,
+[data-theme="dark"] .shadow-sm {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.35);
+}
+
+.dark .shadow-md,
+[data-theme="dark"] .shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
+}
+
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Scrollbar hiding helper */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Utilitas Animasi Compositor-Only (<= 200ms) */
+@keyframes roFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes roSheetIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ro-fade-in {
+  animation: roFadeIn 190ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.ro-sheet-in {
+  animation: roSheetIn 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Safe area inset untuk bottom bar mobile */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* 3D Flip Card Utilities */
+.perspective-1000 {
+  perspective: 1000px;
+}
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+/* Aturan reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Mode Print */
+@media print {
+  :root {
+    --bg: #FFFFFF !important;
+    --surface: #FFFFFF !important;
+    --ink: #000000 !important;
+    --line: #CCCCCC !important;
+  }
+
+  body {
+    background: #FFFFFF !important;
+    color: #000000 !important;
+  }
+
+  header,
+  nav[aria-label="Navigasi Utama"],
+  .no-print {
+    display: none !important;
+  }
+}

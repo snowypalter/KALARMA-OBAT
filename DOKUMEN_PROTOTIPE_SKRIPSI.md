@@ -1,0 +1,112 @@
+# DOKUMEN PENGEMBANGAN MEDIA EDUKASI DIGITAL
+## RUANG OBAT ("Kenali label obatmu, kelola obat di rumahmu")
+
+---
+
+### INFORMASI IDENTITAS PROYEK
+- **Nama Aplikasi Web:** Ruang Obat (Aplikasi Web Responsif)
+- **Kategori Proyek:** Departemen Ilmu Farmasi Klinis — Website Berbasis Sistem Informasi / Media Edukasi Digital
+- **Program Studi:** S1 Farmasi Klinik dan Komunitas
+- **Institusi:** Institut Kesehatan Widya Dharma Husada Tangerang
+- **Jenis Karya:** Tugas Akhir Berbasis Proyek
+- **Tim Pengembang:**
+  - Andika Bella Pratama Putra (NIM 231030790839)
+  - Nur Abdullah Kholiq (NIM 231030790829)
+  - Syahrul Ramdhani (NIM 231030791114)
+- **Sasaran Pengguna:** Mahasiswa Non-Kesehatan dan Masyarakat Umum
+- **Tahun Penyusunan:** 2026
+- **Status Versi:** Versi pengembangan 2026 (Beranda, Cek Label 3 Sediaan, Lemari Obat, Kamus, Skenario Swamedikasi Bercabang, Flashcard 3D-Flip, Kuis Evaluasi Pretest/Posttest, dan Pustaka)
+
+---
+
+### BAB I: LATAR BELAKANG & BATASAN ETIKA
+
+#### 1.1 Masalah dan Urgensi Pengembangan
+Tingkat literasi masyarakat umum dan mahasiswa non-kesehatan dalam membaca etiket atau label obat jadi masih relatif rendah. Fenomena swamedikasi yang sering dijumpai meliputi: ketidakmampuan membedakan golongan obat (bebas, bebas terbatas, dan keras), ketidakpahaman membedakan Tanggal Kedaluwarsa pabrik (Expired Date) dengan Beyond Use Date (BUD) pada sediaan yang telah dibuka, penggunaan antibiotik sisa teman tanpa resep dokter, kesalahan takaran sediaan cair akibat sendok makan dapur, serta cara pembuangan obat rusak yang berpotensi disalahgunakan atau mencemari lingkungan.
+
+#### 1.2 Tujuan Media Edukasi "Ruang Obat"
+Aplikasi "Ruang Obat" dirancang sebagai luaran Tugas Akhir Berbasis Proyek untuk menjembatani komunikasi informasi kefarmasian dalam format yang ramah pengguna, interaktif, dan mudah diakses melalui peramban web ponsel pintar maupun desktop. Fokus edukasi diarahkan pada pengenalan 6 titik informasi label kemasan, penguatan keputusan rasional melalui simulasi skenario kasus, hafalan simbol melalui flashcard, dan pengukuran pemahaman melalui kuis evaluasi Pre-test dan Post-test terstandar.
+
+#### 1.3 Aturan Ketat & Batasan Produk (Ethical Safeguards)
+1. **Tanpa Kalkulator Dosis & Diagnosis:** Aplikasi dengan tegas TIDAK menyediakan alat kalkulasi dosis atau sistem penegakan diagnosis penyakit, guna mencegah terjadinya bahaya swamedikasi berisiko tinggi.
+2. **Tanpa Klaim Berlebihan & Testimoni Palsu:** Aplikasi tidak memuat klaim sepihak seperti "pasti sembuh", "terverifikasi apoteker", atau testimoni buatan untuk menjaga netralitas media edukasi akademik.
+3. **Berbasis Sitasi Buku Ajar & Regulasi Resmi:** Semua uraian medis mengacu langsung pada *Buku Ajar Farmakologi* (HKI, 2022), *Farmakologi dan Terapi Edisi 4* (FKUI), BPOM RI, Kemenkes RI (DAGUSIBU), dan Farmakope Indonesia Edisi VI.
+4. **Kerahasiaan Data Lemari Obat (100% On-Device):** Daftar persediaan obat di rumah yang dimasukkan pengguna hanya tersimpan secara lokal di memori peramban (localStorage) tanpa transmisi ke server luar.
+5. **Batasan Edukasi Wajib Terpampang:** Footer aplikasi secara konsisten menampilkan peringatan: *"Ruang Obat adalah media edukasi informasi obat dan tidak menggantikan saran apoteker atau dokter. Jangan mengobati diri sendiri tanpa bertanya kepada apoteker atau dokter."*
+
+---
+
+### BAB II: SPESIFIKASI PENGEMBANGAN FITUR AKTIF
+
+#### 2.1 Modul Cek Label: 6 Titik Kritis Kemasan Obat
+Menyajikan visualisasi interaktif untuk 3 bentuk sediaan obat yang paling umum di rumah:
+- **Tablet (Strip Foil / Blister):** Sediaan padat obat minum.
+- **Sirup (Botol Cair & Sendok Takar Obat):** Sediaan cair dengan takaran 5 mL dan instruksi "Kocok Dahulu".
+- **Salep (Tube Kulit):** Sediaan semipadat obat luar dengan tanda peringatan khusus "Hanya untuk Obat Luar".
+
+**6 Titik Ketuk Terstandar pada Tiap Kemasan:**
+1. **Logo Golongan Obat:** Identifikasi lingkaran hijau (bebas), biru (bebas terbatas P1-P6), dan merah K (obat keras).
+2. **Nama & Komposisi Zat:** Membedakan merk dagang vs zat generik aktif, dosis per tablet/5 mL, pencegahan duplikasi dosis.
+3. **Indikasi Medis:** Kesesuaian gejala penyakit dengan indikasi resmi yang disetujui BPOM.
+4. **Aturan Pakai & Peringatan:** Frekuensi konsumsi, jarak waktu, hubungan dengan makan, dan tanda peringatan khusus.
+5. **Tanggal Kedaluwarsa & Bets:** Letak cetak emboss/tinta Exp. Date, nomor bets penelusuran mutu, dan batas Beyond Use Date (BUD).
+6. **Nomor Izin Edar (NIE BPOM):** 15 digit verifikasi keaslian obat (DBL, DTL, DKL) melalui aplikasi BPOM Mobile.
+
+#### 2.2 Modul Lemari Obat Saya & Algoritma Status Kedaluwarsa
+Pengguna dapat mencatat, mencari, dan mengelola persediaan obat keluarga di rumah. Sistem otomatis mengklasifikasikan status obat secara objektif dengan indikator ganda (IKON + TEKS, bukan warna semata):
+- **AMAN (> 30 Hari):** Masa simpan masih panjang, obat layak disimpan sesuai petunjuk suhu kemasan.
+- **SEGERA KEDALUWARSA (<= 30 Hari):** Memasuki batas kritis, perlu segera diperiksa jika ada rencana konsumsi atau dipisahkan.
+- **KEDALUWARSA (< 0 Hari):** Telah melewati batas aman pabrik. Tautan otomatis membuka Panduan Pemusnahan Obat Rusak.
+
+#### 2.3 Panduan Simpan & Buang (Prinsip Dagusibu)
+Memuat tata cara penyimpanan (suhu kamar, dingin, kering) dan tata cara merusak sediaan obat sebelum dibuang (menggerus tablet, mencampur dengan ampas kopi/tanah, merusak botol sirup, memotong label) agar tidak dipungut oknum pemalsu obat.
+
+#### 2.4 Kamus Label Obat
+Glosarium 17+ istilah resmi: NIE, BUD, Exp. Date, Peringatan P.1 - P.6, Dosis, Efek Samping, Kontraindikasi, Rekonstitusi, Suhu Simpan, dan Swamedikasi.
+
+#### 2.5 Modul Skenario Swamedikasi (Cerita Bercabang)
+Simulasi kasus klinis nyata untuk menguji penalaran dan pengambilan keputusan swamedikasi yang aman:
+- **Kasus 1 (Antibiotik & AMR):** Demam flu dan bahaya meminum sisa kapsul amoksisilin milik teman.
+- **Kasus 2 (Takaran Sirup):** Batuk anak dan kekeliruan memakai sendok makan dapur (~15 mL) vs sendok takar obat 5 mL berskala.
+- **Kasus 3 (Steroid Kulit):** Gatal lipatan paha dan bahaya mengoleskan salep kortikosteroid keras sembarangan pada infeksi jamur.
+- **Kasus 4 (Antasida Lambung):** Nyeri ulu hati, waktu minum antasida yang optimal (1 jam sebelum / 2 jam setelah makan), dan keharusan mengunyah tablet kunyah.
+- **Red Flags Alert:** Kotak rambu bahaya tanda pasien wajib segera ke dokter/faskes.
+
+#### 2.6 Modul Flashcard Interaktif 3D Flip
+Metode pengulangan aktif (active recall) dengan kartu dua sisi beranimasi putar 3D:
+- 12 kartu terstandar meliputi logo golongan, peringatan P.1-P.6, ED vs BUD, batas Beyond Use Date tetes mata & sirup kering, serta pemusnahan Dagusibu.
+- Dilengkapi pelacak pemahaman lokal (*"Tandai Sudah Paham"*), bar progres persentase, dan filter kategori.
+
+#### 2.7 Modul Kuis Evaluasi (Pre-Test & Post-Test Terstandar)
+Instrumen evaluasi pemahaman literasi obat bagi pengguna:
+- Pilihan mode: **Pre-Test** (uji awal sebelum eksplorasi) dan **Post-Test** (evaluasi capaian belajar).
+- 10 butir soal pilihan ganda terkalibrasi mencakup seluruh kompetensi literasi obat.
+- Kalkulasi skor otomatis (/100) dan komparasi delta peningkatan nilai Pre -> Post.
+- Pembahasan ilmiah komprehensif pada setiap soal berlandaskan regulasi BPOM RI dan Kemenkes RI.
+- Tombol *"Salin Rekap Evaluasi"* yang menyalin format terstruktur ke clipboard.
+
+---
+
+### BAB III: LEMBAR PENILAIAN & VALIDASI DOSEN PEMBIMBING DAN PENGUJI
+
+| No | Indikator Penilaian Kelayakan Media | Skor (1 - 5) | Catatan / Rekomendasi Revisi |
+|:---|:---|:---:|:---|
+| 1 | Kebenaran 6 titik informasi label kemasan (NIE, ED, Logo, dll) | [   ] | ................................................... |
+| 2 | Kepatuhan aspek Patient Safety (Bebas kalkulator/diagnosis liar) | [   ] | ................................................... |
+| 3 | Ketepatan panduan Dagusibu (Penyimpanan & pemusnahan) | [   ] | ................................................... |
+| 4 | Kejelasan bahasa awam untuk mahasiswa non-kesehatan | [   ] | ................................................... |
+| 5 | Kemudahan navigasi responsif dan kecepatan respon UI | [   ] | ................................................... |
+| 6 | Kesesuaian fitur Lemari Obat dengan masa simpan nyata | [   ] | ................................................... |
+| 7 | Kelengkapan glosarium Kamus Label Obat resmi | [   ] | ................................................... |
+| 8 | Relevansi skenario swamedikasi bercabang & red flags rujukan | [   ] | ................................................... |
+| 9 | Efektivitas flashcard 3D flip untuk media belajar mandiri | [   ] | ................................................... |
+| 10 | Validitas instrumen kuis Pre-Test & Post-Test untuk evaluasi literasi | [   ] | ................................................... |
+
+**Kesimpulan Evaluasi Dosen Pembimbing dan Penguji:**
+- [  ] Layak Tanpa Revisi
+- [  ] Layak dengan Revisi Kecil
+- [  ] Belum Layak Diuji Lapangan
+
+Tanda Tangan Dosen Pembimbing / Penguji:  
+( .................................................................... )  
+NIDN / NIP: .......................................................
