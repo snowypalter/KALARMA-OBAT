@@ -268,15 +268,39 @@ const handlePhotoUpload = (nim: string, file: File) => {
                   {/* Photo Upload Area */}
                   <div className="relative group">
                     {photoUrl ? (
-                      <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-surface-muted border-2 border-brand shadow-sm">
+                      <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-surface-muted border border-line">
                         <img
                           src={photoUrl}
                           alt={anggota.nama}
                           className="w-full h-full object-cover"
                         />
-                        <div className="absolute top-1 right-1 inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-brand/90 text-white text-[10px] font-bold uppercase tracking-wider">
-                          <Lock className="w-3 h-3" />
-                          <span>Terkunci</span>
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
+                          <label
+                            htmlFor={`photo_${anggota.nim}`}
+                            className="min-h-[36px] min-w-[36px] rounded-lg bg-brand hover:bg-forest text-white flex items-center justify-center cursor-pointer transition-colors"
+                            title="Ubah foto"
+                          >
+                            <Camera className="w-3.5 h-3.5" />
+                            <input
+                              id={`photo_${anggota.nim}`}
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => {
+                                if (e.target.files?.[0]) {
+                                  handlePhotoUpload(anggota.nim, e.target.files[0]);
+                                }
+                              }}
+                              className="hidden"
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => handleRemovePhoto(anggota.nim)}
+                            className="min-h-[36px] min-w-[36px] rounded-lg bg-status-kedaluwarsa-text hover:bg-status-kedaluwarsa-text/80 text-white flex items-center justify-center transition-colors"
+                            title="Hapus foto"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
                         </div>
                       </div>
                     ) : (
