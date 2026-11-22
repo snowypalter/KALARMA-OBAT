@@ -28,27 +28,34 @@ export const TentangModal: React.FC<TentangModalProps> = ({ isOpen, onClose }) =
   // Load photos from localStorage on mount
   useEffect(() => {
     if (isOpen) {
-      const stored: Record<string, string> = {};
-      IDENTITAS_PROYEK.timPengembang.forEach((member) => {
-        const key = `team_photo_${member.nim}`;
-        const photoData = localStorage.getItem(key);
-        if (photoData) {
-          stored[member.nim] = photoData;
+      try {
+        const stored = localStorage.getItem(PHOTO_STORAGE_KEY);
+        if (stored) {
+          setTeamPhotos(JSON.parse(stored));
         }
-      });
-      setTeamPhotos(stored);
+      } catch (err) {
+        console.warn('Failed to load team photos', err);
+        setTeamPhotos({});
+      }
     }
   }, [isOpen]);
 
-  const handlePhotoUpload = (nim: string, file: File) => {
+const PHOTO_STORAGE_KEY = 'ruang_obat_team_photos_v1';
+
+const handlePhotoUpload = (nim: string, file: File) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const dataUrl = e.target?.result as string;
-      setTeamPhotos((prev) => ({
-        ...prev,
-        [nim]: dataUrl,
-      }));
-      localStorage.setItem(`team_photo_${nim}`, dataUrl);
+      setTeamPhotos((prev) => {
+        const updated = { ...prev, [nim]: dataUrl };
+        // Backup to localStorage
+        try {
+          localStorage.setItem(PHOTO_STORAGE_KEY, JSON.stringify(updated));
+        } catch (err) {
+          console.warn('LocalStorage quota exceeded', err);
+        }
+        return updated;
+      });
     };
     reader.readAsDataURL(file);
   };
@@ -57,9 +64,14 @@ export const TentangModal: React.FC<TentangModalProps> = ({ isOpen, onClose }) =
     setTeamPhotos((prev) => {
       const updated = { ...prev };
       delete updated[nim];
+      // Backup removal to localStorage
+      try {
+        localStorage.setItem(PHOTO_STORAGE_KEY, JSON.stringify(updated));
+      } catch (err) {
+        console.warn('LocalStorage update failed', err);
+      }
       return updated;
     });
-    localStorage.removeItem(`team_photo_${nim}`);
   };
 
   return (
