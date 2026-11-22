@@ -114,9 +114,9 @@ function formatGeminiError(err: unknown): { status: number; message: string } {
   };
 }
 
-async function startServer() {
-  const app = express();
+export const app = express();
 
+export async function initApp() {
   app.use(express.json({ limit: '50mb' }));
 
   await knowledgeBase.ensureInitialized();
@@ -375,12 +375,23 @@ INSTRUKSI AKHIR: Jawab dengan mengutip ketat isi buku pada KONTEKS SUMBER di ata
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Ruang Obat server running at http://0.0.0.0:${PORT}`);
-  });
+  return app;
 }
 
-startServer().catch((err) => {
-  console.error('Failed to start Ruang Obat server:', err);
-  process.exit(1);
-});
+export const appPromise = initApp();
+
+export default async function handler(req: any, res: any) {
+  await appPromise;
+  return app(req, res);
+}
+
+if (!process.env.VERCEL) {
+  appPromise.then(() => {
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`Ruang Obat server running at http://0.0.0.0:${PORT}`);
+    });
+  }).catch((err) => {
+    console.error('Failed to start Ruang Obat server:', err);
+    process.exit(1);
+  });
+}
