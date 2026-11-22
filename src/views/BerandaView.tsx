@@ -8,6 +8,7 @@ import {
 } from '../utils/medicineUtils';
 import { SHOW_REVIEWER_TOOLS } from '../config/appConfig';
 import { IDENTITAS_PROYEK } from '../data/identitasProyek';
+import { DAGUSIBU_STEPS, SAFETY_CHECKLIST_ITEMS } from '../data/dagusibuData';
 import {
   ScanSearch,
   Archive,
@@ -45,45 +46,6 @@ import homeCareIllustration from '../assets/images/dagusibu_home_care_1795269733
 
 const WALKTHROUGH_STORAGE_KEY = 'ruang_obat_walkthrough_done_v1';
 const CHECKLIST_STORAGE_KEY = 'ruang_obat_safety_checklist_v1';
-
-const SAFETY_CHECKLIST_ITEMS = [
-  { id: 'logo', label: 'Periksa logo golongan obat (hijau, biru, atau merah K) sebelum konsumsi' },
-  { id: 'bud', label: 'Catat tanggal buka pertama pada botol sirup atau tetes mata (batas BUD)' },
-  { id: 'takaran', label: 'Gunakan sendok takar bawaan obat, bukan sendok makan dapur' },
-  { id: 'simpan', label: 'Simpan obat di tempat sejuk dan kering, jauh dari kamar mandi lembap' },
-  { id: 'kedaluwarsa', label: 'Pisahkan dan musnahkan obat kedaluwarsa sesuai panduan DAGUSIBU' },
-];
-
-const DAGUSIBU_STEPS = [
-  {
-    num: '01',
-    title: 'Dapatkan',
-    desc: 'Peroleh obat di apotek atau fasilitas berizin dan pastikan kemasan tersegel serta memiliki NIE BPOM.',
-    actionLabel: 'Cek NIE Kemasan',
-    target: 'cek-label' as const,
-  },
-  {
-    num: '02',
-    title: 'Gunakan',
-    desc: 'Patuhi aturan pakai, dosis per takaran, dan tanda peringatan khusus tanpa berbagi antibiotik resep.',
-    actionLabel: 'Latih Kasus Aman',
-    target: 'latihan' as const,
-  },
-  {
-    num: '03',
-    title: 'Simpan',
-    desc: 'Jaga di suhu ruang kering sesuai etiket, pisahkan dari jangkauan anak, dan pantau tanggal kedaluwarsa.',
-    actionLabel: 'Panduan Simpan',
-    target: 'simpan' as const,
-  },
-  {
-    num: '04',
-    title: 'Buang',
-    desc: 'Rusak kemasan, campur isi tablet/salep dengan bahan tidak menarik, lalu lepas label sebelum dibuang.',
-    actionLabel: 'Panduan Buang',
-    target: 'buang' as const,
-  },
-];
 
 interface BerandaViewProps {
   onNavigate: (tab: TabType) => void;
