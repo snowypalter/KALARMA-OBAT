@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { MedicineItem, SediaanType } from '../types';
 import { calculateDaysRemaining, formatIndonesianDate } from '../utils/medicineUtils';
+import { DISPOSAL_ADVICE_BY_SEDIAAN, isAntibioticByKeyword } from '../data/disposalAdviceData';
 import {
   AlertOctagon,
   ChevronDown,
@@ -21,113 +22,31 @@ interface SmartExpiryNotificationProps {
   onRequestDelete: (medicine: MedicineItem) => void;
 }
 
-interface DisposalAdvice {
-  ringkasanSingkat: string;
-  langkah: [string, string, string];
-  peringatanKhusus?: string;
-}
+export function getSmartDisposalAdvice(medicine: MedicineItem) {
+  const isAntibiotic = isAntibioticByKeyword(medicine.name, medicine.notes);
+  
+  // Get base advice from external data file
+  const base = DISPOSAL_ADVICE_BY_SEDIAAN[medicine.sediaan] || DISPOSAL_ADVICE_BY_SEDIAAN.Lainnya;
 
-const ANTIBIOTIC_KEYWORDS = [
-  'antibiotik',
-  'amoksisilin',
-  'amoxicillin',
-  'ampisilin',
-  'azitromisin',
-  'azithromycin',
-  'sefiksim',
-  'cefixime',
-  'sefadroksil',
-  'cefadroxil',
-  'siprofloksasin',
-  'ciprofloxacin',
-  'kotrimoksazol',
-  'doksisiklin',
-  'tetrasiklin',
-  'eritromisin',
-  'kloramfenikol',
-  'metronidazol',
-  'klindamisin',
-];
-
-export function getSmartDisposalAdvice(medicine: MedicineItem): DisposalAdvice {
-  const lowerName = `${medicine.name} ${medicine.notes ?? ''}`.toLowerCase();
-  const isAntibiotic = ANTIBIOTIC_KEYWORDS.some((kw) => lowerName.includes(kw));
-
-  const sediaanMap: Record<SediaanType, DisposalAdvice> = {
-    Tablet: {
-      ringkasanSingkat:
-        'Keluarkan tablet dari blister, hancurkan bersama tanah/ampas kopi, dan rusak kemasan sebelum dibuang.',
+  // For 'Sirup / Cair', customize the step based on antibiotic detection
+  if (medicine.sediaan === 'Sirup / Cair' && isAntibiotic) {
+    return {
+      ringkasanSingkat: base.ringkasanSingkat,
       langkah: [
-        'Segera pisahkan dari kotak P3K agar tidak terminum secara tidak sengaja.',
-        'Keluarkan seluruh tablet dari strip/blister, gerus atau campur dengan bahan tidak menarik seperti ampas kopi atau tanah dalam plastik tertutup.',
-        'Gunting blister serta lepas atau coret label identitas pada dus sebelum dibuang ke tempat sampah domestik.',
-      ],
-    },
-    Kapsul: {
-      ringkasanSingkat:
-        'Keluarkan isi/cangkang kapsul, campur dengan ampas kopi/tanah dalam wadah tertutup, dan rusak kemasan.',
-      langkah: [
-        'Segera pisahkan dari obat lain yang masih aman dikonsumsi.',
-        'Buka atau keluarkan kapsul dari kemasan aslinya, lalu campur dengan tanah, pasir, atau ampas kopi dalam kantong plastik terikat rapat.',
-        'Rusak strip/botol dan lepaskan label etiket sebelum dibuang agar tidak disalahgunakan.',
-      ],
-    },
-    'Sirup / Cair': {
-      ringkasanSingkat:
-        'Periksa jenis cairan terlebih dahulu: sirup biasa dapat diencerkan, sedangkan antibiotik/obat khusus harus diserahkan ke apotek atau dicampur bahan penyerap.',
-      langkah: [
-        'Hentikan pemakaian segera dan jauhkan botol dari jangkauan anak-anak.',
-        isAntibiotic
-          ? 'Karena terdeteksi sebagai antibiotik, JANGAN tuang ke wastafel/saluran air untuk mencegah pencemaran dan resistensi antimikroba. Campurkan cairan dengan ampas kopi/pasir di plastik tertutup atau kembalikan ke apotek/puskesmas.'
-          : 'Untuk sirup non-antibiotik (obat bebas biasa), encerkan dengan air lalu buang perlahan ke saluran pembuangan; atau serap dengan tisu/ampas kopi dalam plastik tertutup.',
-        'Lepas dan rusak label pada botol, bilas singkat wadah kosong, lalu buang botol tanpa tutup dalam keadaan rusak/penyok.',
-      ],
-    },
-    'Salep / Krim / Gel': {
-      ringkasanSingkat:
-        'Keluarkan seluruh sisa salep ke plastik berisi tanah/ampas kopi, lalu pipihkan tube dan lepas label.',
-      langkah: [
-        'Hentikan pengolesan pada kulit karena sediaan semipadat kedaluwarsa berisiko teroksidasi atau terkontaminasi mikroba.',
-        'Pencet dan keluarkan seluruh sisa salep/krim dari dalam tube ke kantong plastik berisi tanah atau ampas kopi, lalu ikat rapat.',
-        'Pipihkan atau gunting ujung tube dan lepaskan label kemasan sebelum membuangnya ke sampah domestik.',
-      ],
-    },
-    'Tetes Mata / Telinga': {
-      ringkasanSingkat:
-        'Kosongkan botol penetes dengan aman, rusak ujung penetes (dropper), dan buang terpisah dari tutupnya.',
-      langkah: [
-        'Segera hentikan penggunaan pada mata atau telinga untuk mencegah infeksi atau iritasi berat.',
-        'Kosongkan cairan sisa (serap dengan tisu/kapas ke plastik tertutup untuk obat keras/antibiotik, atau buang sesuai petunjuk apoteker).',
-        'Rusak bagian penetes (dropper) dan lepas label botol, lalu buang terpisah antara botol dan tutupnya.',
-      ],
-    },
-    'Inhaler / Semprot': {
-      ringkasanSingkat:
-        'Jangan melubangi atau membakar tabung bertekanan; kembalikan ke apotek atau puskesmas terdekat.',
-      langkah: [
-        'Hentikan penggunaan segera karena efektivitas dosis semprotan tidak lagi terjamin.',
-        'JANGAN melubangi, menekan paksa, atau membakar tabung aerosol/inhaler karena berisiko meledak.',
-        'Simpan di wadah terpisah dan serahkan kepada apotek atau fasilitas kesehatan yang menerima pengembalian limbah farmasi.',
-      ],
-    },
-    Lainnya: {
-      ringkasanSingkat:
-        'Pisahkan dari obat aktif, rusak identitas kemasan, dan konsultasikan cara pemusnahan ke apoteker.',
-      langkah: [
-        'Keluarkan obat dari tempat penyimpanan harian dan beri tanda agar tidak digunakan anggota keluarga.',
-        'Pertahankan dalam wadah tertutup sementara hingga siap dimusnahkan atau diserahkan ke apotek terdekat.',
-        'Lepas atau coret label informasi pada kemasan sekunder sebelum membuang wadah kosong.',
-      ],
-    },
-  };
-
-  const base = sediaanMap[medicine.sediaan] || sediaanMap.Lainnya;
+        base.langkah[0],
+        'Karena terdeteksi sebagai antibiotik, JANGAN tuang ke wastafel/saluran air untuk mencegah pencemaran dan resistensi antimikroba. Campurkan cairan dengan ampas kopi/pasir di plastik tertutup atau kembalikan ke apotek/puskesmas.',
+        base.langkah[2],
+      ] as [string, string, string],
+      peringatanKhusus: 'Terdeteksi obat golongan antibiotik: hindari membuang ke saluran air/kloset atau membuang utuh ke tempat sampah terbuka.',
+    };
+  }
 
   return {
-    ...base,
+    ringkasanSingkat: base.ringkasanSingkat,
+    langkah: base.langkah as [string, string, string],
     peringatanKhusus: isAntibiotic
       ? 'Terdeteksi obat golongan antibiotik: hindari membuang ke saluran air/kloset atau membuang utuh ke tempat sampah terbuka.'
-      : undefined,
+      : base.peringatanKhusus,
   };
 }
 

@@ -35,19 +35,19 @@ export const PanduanSimpanBuangModal: React.FC<PanduanSimpanBuangModalProps> = (
       maxWidth="xl"
       headerIcon={<BookOpen className="w-5 h-5" />}
       footer={
-        <div className="flex items-center justify-between text-xs text-ink-muted">
-          <span>Rujukan: Dagusibu Kemenkes &amp; BPOM RI</span>
+        <div className="flex items-center justify-between text-xs text-ink-muted w-full gap-2">
+          <span className="truncate">Rujukan: Dagusibu Kemenkes &amp; BPOM RI</span>
           <button
             type="button"
             onClick={onClose}
-            className="min-h-[44px] px-5 py-2 font-semibold text-forest bg-surface border border-line hover:bg-surface-muted rounded-xl transition-colors cursor-pointer"
+            className="min-h-[40px] px-5 py-2 font-semibold text-forest bg-surface border border-line hover:bg-surface-muted rounded-xl transition-colors cursor-pointer shrink-0"
           >
             Tutup
           </button>
         </div>
       }
     >
-      <div className="space-y-5">
+      <div className="space-y-5 pb-3">
         {/* Mode Switcher: Simpan vs Buang */}
         <div className="grid grid-cols-2 gap-1.5 bg-surface-muted p-1.5 rounded-2xl border border-line">
           <button

@@ -23,38 +23,45 @@ interface TentangModalProps {
   onClose: () => void;
 }
 
+const PHOTO_STORAGE_KEY = 'ruang_obat_team_photos_v1';
+// Status kunci foto tim pengembang (ubah ke false jika diminta dibuka)
+const IS_PHOTO_LOCKED = true;
+
 export const TentangModal: React.FC<TentangModalProps> = ({ isOpen, onClose }) => {
   const [teamPhotos, setTeamPhotos] = useState<Record<string, string>>({});
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  // Load photos from localStorage, with defaults from TEAM_PHOTOS
+  // Load photos from TEAM_PHOTOS with fallback to localStorage
   useEffect(() => {
-    if (isOpen) {
+    if (!isInitialized) {
       try {
+        let currentStored: Record<string, string> = {};
         const stored = localStorage.getItem(PHOTO_STORAGE_KEY);
         if (stored) {
-          setTeamPhotos(JSON.parse(stored));
-        } else {
-          // Load default photos from TEAM_PHOTOS data
-          const defaults: Record<string, string> = {};
-          IDENTITAS_PROYEK.timPengembang.forEach((member) => {
-            if (TEAM_PHOTOS[member.nim]) {
-              defaults[member.nim] = TEAM_PHOTOS[member.nim];
-            }
-          });
-          setTeamPhotos(defaults);
-          // Auto-save defaults
-          if (Object.keys(defaults).length > 0) {
-            localStorage.setItem(PHOTO_STORAGE_KEY, JSON.stringify(defaults));
+          try {
+            currentStored = JSON.parse(stored);
+          } catch {
+            currentStored = {};
           }
         }
+
+        // Merge with code-defined TEAM_PHOTOS (code provides official photos)
+        const merged: Record<string, string> = { ...currentStored };
+        IDENTITAS_PROYEK.timPengembang.forEach((member) => {
+          if (TEAM_PHOTOS[member.nim]) {
+            merged[member.nim] = TEAM_PHOTOS[member.nim];
+          }
+        });
+
+        setTeamPhotos(merged);
+        localStorage.setItem(PHOTO_STORAGE_KEY, JSON.stringify(merged));
+        setIsInitialized(true);
       } catch (err) {
         console.warn('Failed to load team photos', err);
-        setTeamPhotos({});
+        setIsInitialized(true);
       }
     }
-  }, [isOpen]);
-
-const PHOTO_STORAGE_KEY = 'ruang_obat_team_photos_v1';
+  }, [isInitialized]);
 
 const handlePhotoUpload = (nim: string, file: File) => {
     const reader = new FileReader();
@@ -246,8 +253,9 @@ const handlePhotoUpload = (nim: string, file: File) => {
                 Tim Pengembang
               </h3>
             </div>
-            <span className="text-[11px] font-mono text-brand font-semibold">
-              3 Anggota Peneliti
+            <span className="inline-flex items-center gap-1 text-[11px] font-mono text-brand font-semibold">
+              <Lock className="w-3 h-3" />
+              <span>3 Anggota Terverifikasi</span>
             </span>
           </div>
 
@@ -265,7 +273,7 @@ const handlePhotoUpload = (nim: string, file: File) => {
                   key={anggota.nim}
                   className="p-3 rounded-xl bg-surface border border-line flex flex-col justify-between gap-2 shadow-2xs"
                 >
-                  {/* Photo Upload Area */}
+                  {/* Photo Area */}
                   <div className="relative group">
                     {photoUrl ? (
                       <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-surface-muted border border-line">
@@ -274,34 +282,36 @@ const handlePhotoUpload = (nim: string, file: File) => {
                           alt={anggota.nama}
                           className="w-full h-full object-cover"
                         />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
-                          <label
-                            htmlFor={`photo_${anggota.nim}`}
-                            className="min-h-[36px] min-w-[36px] rounded-lg bg-brand hover:bg-forest text-white flex items-center justify-center cursor-pointer transition-colors"
-                            title="Ubah foto"
-                          >
-                            <Camera className="w-3.5 h-3.5" />
-                            <input
-                              id={`photo_${anggota.nim}`}
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => {
-                                if (e.target.files?.[0]) {
-                                  handlePhotoUpload(anggota.nim, e.target.files[0]);
-                                }
-                              }}
-                              className="hidden"
-                            />
-                          </label>
-                          <button
-                            type="button"
-                            onClick={() => handleRemovePhoto(anggota.nim)}
-                            className="min-h-[36px] min-w-[36px] rounded-lg bg-status-kedaluwarsa-text hover:bg-status-kedaluwarsa-text/80 text-white flex items-center justify-center transition-colors"
-                            title="Hapus foto"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
+                        {!IS_PHOTO_LOCKED && (
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
+                            <label
+                              htmlFor={`photo_${anggota.nim}`}
+                              className="min-h-[36px] min-w-[36px] rounded-lg bg-brand hover:bg-forest text-white flex items-center justify-center cursor-pointer transition-colors"
+                              title="Ubah foto"
+                            >
+                              <Camera className="w-3.5 h-3.5" />
+                              <input
+                                id={`photo_${anggota.nim}`}
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                  if (e.target.files?.[0]) {
+                                    handlePhotoUpload(anggota.nim, e.target.files[0]);
+                                  }
+                                }}
+                                className="hidden"
+                              />
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => handleRemovePhoto(anggota.nim)}
+                              className="min-h-[36px] min-w-[36px] rounded-lg bg-status-kedaluwarsa-text hover:bg-status-kedaluwarsa-text/80 text-white flex items-center justify-center transition-colors"
+                              title="Hapus foto"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <label

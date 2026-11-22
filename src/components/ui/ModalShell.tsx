@@ -26,11 +26,17 @@ export const ModalShell: React.FC<ModalShellProps> = ({
 }) => {
   const titleId = useId();
   const modalRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
-  // Focus trap & body scroll lock
+  // Focus trap, scroll reset & body scroll lock
   useEffect(() => {
     if (!isOpen) return;
+
+    // Reset scroll to top immediately on open
+    if (contentRef.current) {
+      contentRef.current.scrollTop = 0;
+    }
 
     // Save previous active element
     previousFocusRef.current = document.activeElement as HTMLElement | null;
@@ -39,17 +45,10 @@ export const ModalShell: React.FC<ModalShellProps> = ({
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
-    // Focus first element or modal container
+    // Focus modal container without scrolling
     const focusTimer = setTimeout(() => {
       if (modalRef.current) {
-        const focusable = modalRef.current.querySelectorAll<HTMLElement>(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        );
-        if (focusable.length > 0) {
-          focusable[0].focus();
-        } else {
-          modalRef.current.focus();
-        }
+        modalRef.current.focus({ preventScroll: true });
       }
     }, 50);
 
@@ -131,14 +130,14 @@ export const ModalShell: React.FC<ModalShellProps> = ({
         <div className="w-10 h-1.5 bg-line-strong/30 rounded-full mx-auto my-2.5 sm:hidden shrink-0" aria-hidden="true" />
 
         {/* Header */}
-        <div className="flex items-center justify-between px-5 sm:px-6 py-3.5 sm:py-4 border-b border-line bg-surface shrink-0">
-          <div className="flex items-center gap-3 pr-2">
+        <div className="flex items-center justify-between px-5 sm:px-6 py-3.5 sm:py-4 border-b border-line bg-surface shrink-0 gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             {headerIcon && (
               <div className="w-9 h-9 rounded-xl bg-secondary text-brand flex items-center justify-center shrink-0">
                 {headerIcon}
               </div>
             )}
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <h2 id={titleId} className="font-display text-base sm:text-lg font-semibold text-forest leading-tight truncate">
                 {title}
               </h2>
@@ -153,7 +152,7 @@ export const ModalShell: React.FC<ModalShellProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="min-h-[44px] min-w-[44px] -mr-2 rounded-xl text-ink-muted hover:text-ink hover:bg-surface-muted flex items-center justify-center transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-focus shrink-0"
+            className="w-9 h-9 rounded-full text-ink-muted hover:text-ink hover:bg-surface-muted border border-transparent hover:border-line flex items-center justify-center transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-focus shrink-0"
             aria-label="Tutup dialog"
           >
             <X className="w-5 h-5" />
@@ -161,13 +160,16 @@ export const ModalShell: React.FC<ModalShellProps> = ({
         </div>
 
         {/* Scrollable Body Content */}
-        <div className="p-5 sm:p-6 overflow-y-auto flex-1 overscroll-contain">
+        <div ref={contentRef} className="p-5 sm:p-6 overflow-y-auto flex-1 overscroll-contain">
           {children}
         </div>
 
-        {/* Optional Footer */}
+        {/* Optional Footer with guaranteed safe bottom spacing */}
         {footer && (
-          <div className="px-5 sm:px-6 py-3.5 bg-surface-muted/60 border-t border-line shrink-0 pb-safe sm:pb-3.5">
+          <div
+            className="px-5 sm:px-6 pt-3.5 bg-surface-muted/60 border-t border-line shrink-0"
+            style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom, 1rem))' }}
+          >
             {footer}
           </div>
         )}
