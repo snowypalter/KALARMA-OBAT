@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ModalShell } from './ui';
 import { IDENTITAS_PROYEK } from '../data/identitasProyek';
 import {
@@ -13,6 +13,8 @@ import {
   Archive,
   Dumbbell,
   Bot,
+  Camera,
+  X,
 } from 'lucide-react';
 
 interface TentangModalProps {
@@ -21,6 +23,45 @@ interface TentangModalProps {
 }
 
 export const TentangModal: React.FC<TentangModalProps> = ({ isOpen, onClose }) => {
+  const [teamPhotos, setTeamPhotos] = useState<Record<string, string>>({});
+
+  // Load photos from localStorage on mount
+  useEffect(() => {
+    if (isOpen) {
+      const stored: Record<string, string> = {};
+      IDENTITAS_PROYEK.timPengembang.forEach((member) => {
+        const key = `team_photo_${member.nim}`;
+        const photoData = localStorage.getItem(key);
+        if (photoData) {
+          stored[member.nim] = photoData;
+        }
+      });
+      setTeamPhotos(stored);
+    }
+  }, [isOpen]);
+
+  const handlePhotoUpload = (nim: string, file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string;
+      setTeamPhotos((prev) => ({
+        ...prev,
+        [nim]: dataUrl,
+      }));
+      localStorage.setItem(`team_photo_${nim}`, dataUrl);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemovePhoto = (nim: string) => {
+    setTeamPhotos((prev) => {
+      const updated = { ...prev };
+      delete updated[nim];
+      return updated;
+    });
+    localStorage.removeItem(`team_photo_${nim}`);
+  };
+
   return (
     <ModalShell
       isOpen={isOpen}
@@ -191,21 +232,89 @@ export const TentangModal: React.FC<TentangModalProps> = ({ isOpen, onClose }) =
                 .map((n) => n[0])
                 .slice(0, 2)
                 .join('');
+              const photoUrl = teamPhotos[anggota.nim];
+
               return (
                 <div
                   key={anggota.nim}
                   className="p-3 rounded-xl bg-surface border border-line flex flex-col justify-between gap-2 shadow-2xs"
                 >
+                  {/* Photo Upload Area */}
+                  <div className="relative group">
+                    {photoUrl ? (
+                      <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-surface-muted border border-line">
+                        <img
+                          src={photoUrl}
+                          alt={anggota.nama}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
+                          <label
+                            htmlFor={`photo_${anggota.nim}`}
+                            className="min-h-[36px] min-w-[36px] rounded-lg bg-brand hover:bg-forest text-white flex items-center justify-center cursor-pointer transition-colors"
+                            title="Ubah foto"
+                          >
+                            <Camera className="w-3.5 h-3.5" />
+                            <input
+                              id={`photo_${anggota.nim}`}
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => {
+                                if (e.target.files?.[0]) {
+                                  handlePhotoUpload(anggota.nim, e.target.files[0]);
+                                }
+                              }}
+                              className="hidden"
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => handleRemovePhoto(anggota.nim)}
+                            className="min-h-[36px] min-w-[36px] rounded-lg bg-status-kedaluwarsa-text hover:bg-status-kedaluwarsa-text/80 text-white flex items-center justify-center transition-colors"
+                            title="Hapus foto"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <label
+                        htmlFor={`photo_${anggota.nim}`}
+                        className="relative w-full aspect-square rounded-lg overflow-hidden bg-sand-soft border-2 border-dashed border-sand text-forest flex flex-col items-center justify-center cursor-pointer hover:bg-sand hover:border-sand-soft transition-colors gap-1.5 group/upload"
+                      >
+                        <Camera className="w-5 h-5 text-brand group-hover/upload:scale-110 transition-transform" />
+                        <span className="text-[10px] font-semibold text-center px-1">
+                          Tambah Foto
+                        </span>
+                        <input
+                          id={`photo_${anggota.nim}`}
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            if (e.target.files?.[0]) {
+                              handlePhotoUpload(anggota.nim, e.target.files[0]);
+                            }
+                          }}
+                          className="hidden"
+                        />
+                      </label>
+                    )}
+                  </div>
+
+                  {/* Name & NIM */}
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-sand-soft text-forest font-bold text-xs flex items-center justify-center shrink-0 border border-sand/60">
-                      {initials}
-                    </div>
+                    {!photoUrl && (
+                      <div className="w-8 h-8 rounded-lg bg-sand-soft text-forest font-bold text-xs flex items-center justify-center shrink-0 border border-sand/60">
+                        {initials}
+                      </div>
+                    )}
                     <div className="min-w-0 flex-1">
                       <div className="text-xs font-bold text-forest leading-snug line-clamp-2">
                         {anggota.nama}
                       </div>
                     </div>
                   </div>
+
                   <div className="pt-1.5 border-t border-line/60 flex items-center justify-between text-[11px]">
                     <span className="text-ink-muted">NIM</span>
                     <span className="font-mono font-semibold text-forest tabular-nums">
@@ -219,22 +328,6 @@ export const TentangModal: React.FC<TentangModalProps> = ({ isOpen, onClose }) =
 
           <p className="text-[11px] text-ink-muted text-center pt-1">
             Program Studi S1 Farmasi Klinis dan Komunitas · Institut Kesehatan Widya Dharma Husada Tangerang
-          </p>
-        </section>
-
-        {/* KARTU 5: PEMBERITAHUAN EDUKASI & BATASAN KESELAMATAN */}
-        <section className="p-4 rounded-2xl bg-status-segera-bg/50 border border-status-segera-text/30 text-status-segera-text space-y-2">
-          <div className="flex items-center gap-2 font-bold text-status-segera-text text-xs sm:text-sm">
-            <AlertTriangle className="w-4 h-4 shrink-0" />
-            <span>Pemberitahuan Edukasi &amp; Batasan Produk</span>
-          </div>
-
-          <p className="text-xs sm:text-sm font-medium leading-relaxed text-ink">
-            Ruang Obat adalah media edukasi informasi obat dan tidak menggantikan saran apoteker atau dokter. Jangan mengobati diri sendiri tanpa bertanya kepada apoteker atau dokter.
-          </p>
-
-          <p className="text-[11px] sm:text-xs text-ink-muted leading-relaxed">
-            Aplikasi ini <strong className="text-ink">TIDAK</strong> menyediakan kalkulator dosis personal, penegakan diagnosis penyakit, atau rekomendasi pemilihan obat tertentu untuk kondisi medis pribadi.
           </p>
         </section>
       </div>
